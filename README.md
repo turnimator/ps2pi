@@ -11,3 +11,7 @@ knockoff PS2 controller, so I sat down and hacked it beyond recognition.
 I've probably thrown a dozen babies out with the bath water, but now
 
 IT WORKS FOR ME
+
+To compile, you need the wiringPi library, and if you want to run the curstst program,
+you'll need the curses library.
+I've included two shell scripsts for your convenience.
