@@ -18,42 +18,9 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include "PiPS2.h"
+#include "ps2pi.h"
 
 #define READDELAYMS 10
-
-void printPS2data(PIPS2 * ps)
-{
-	static bool busy=false;
-	if (busy){
-		return;
-	}
-	if (!ps->isValid()){
-		return;
-	}
-	busy = true;
-	printf("%02x %02x %02x  ", ps->PS2data[0],ps->PS2data[1],ps->PS2data[2]);
-	for(int i = 0; i < 8; i++){
-		if (ps->PS2data[3]&(1<<i)){
-			printf(" ");
-		}
-		else {
-			printf("%d",i);
-		}
-	}
-	for(int i = 0; i < 8; i++){
-		if (ps->PS2data[4]&(1<<i)){
-			printf(" ");
-		}
-		else {
-			printf("X");
-		}
-	}
-	for (int i = 5; i < 9; i++){
-		printf("%2x ",ps->PS2data[i]);
-	}
-	busy = false;
-}
 
 int main(int argc, char **argv)
 {
@@ -62,18 +29,18 @@ int main(int argc, char **argv)
     printf("Atles PS2 Controller\n");
 
     if (wiringPiSetupPhys() == -1) {
-	fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
-	return 1;
+		fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
+		return 1;
     }
-    // //////////// PiPS2 stuff ////////////////////////////
+    
     // Create a PIPS2 object
-    PIPS2 pips2;
+    ps2pi_t pips2;
     int nextRead = READDELAYMS;
     pips2.begin(11, 3, 5, 13);
 
     int returnVal = pips2.reInitializeController(ANALOGMODE);
     delay(50);
-    printf("Control mode = %2x\n", pips2.PS2data[1]);
+    pips2.printData();
 
     while (1) {
 	    pips2.readPS2();    
@@ -81,90 +48,84 @@ int main(int argc, char **argv)
 		printf("\r");
 	    if (pips2.isXPressed()) {
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("X\n"); 
 		}
 	    if (pips2.isCirclePressed()) {
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("O\n"); 
 		}
 	    if (pips2.isSquarePressed()) {
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("[]\n"); 
 		}
 	    if (pips2.isTrianglePressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("/\\\n"); 
 		}
 		if (pips2.isSelectPressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("Select\n");
 		}
 		if (pips2.isLeftJoyPressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("Left Joy\n");
 		}
 		if (pips2.isRightJoyPressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("Right Joy\n");
 		}
 		if (pips2.isL1Pressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("L1\n");
 		}
 		if (pips2.isL2Pressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("L2\n");
 		}
 		if (pips2.isPadDownPressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("Pad Down\n");
 		}
 		if (pips2.isPadLeftPressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("Pad Left\n");
 		}
 		if (pips2.isPadRightPressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("Pad Right\n");
 		}
 		if (pips2.isPadUpPressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("Pad Up\n");
 		}
 		if (pips2.isR1Pressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("R1\n");
 		}
 		if (pips2.isR2Pressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("R2\n");
 		}
 		if (pips2.isStartPressed()){
 			printf("\n");
-			printPS2data(&pips2);
+			pips2.printData();
 			printf("Start\n");
 		}
-
-
-
-
-
-
     }
 
     return 0;
