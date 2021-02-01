@@ -92,7 +92,7 @@ class ps2pi_t {
 		char getLeftY();
 		char getRighX();
 		char getRighY();
-		
+		inline char getMode() { return PS2data[1]; }
 		void printData();
 	private:
 		char controller_type;

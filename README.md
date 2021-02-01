@@ -1,5 +1,5 @@
 # ps2pi
-##PS2 Controller Library for the Raspberry Pi
+## PS2 Controller Library for the Raspberry Pi
  
  This project is built from bits and pieces I've found on the Internet,
  including, but not limited to 
@@ -15,3 +15,7 @@ IT WORKS FOR ME
 To compile, you need the wiringPi library, and if you want to run the curstst program,
 you'll need the curses library.
 I've included two shell scripsts for your convenience.
+
+## TODO
+See if I can get pressure mode and native mode to work.
+Find a better way to ensure valid data
