@@ -85,7 +85,7 @@ void move_invaders(){
 }
 
 // TODO Print the space invaders on screen and move them around
-
+char help[] = "MODE:change X:shoot LEFT-JOY:move START:restart SELECT:end";
 int main(int argc, char **argv)
 {
 
@@ -104,17 +104,16 @@ int main(int argc, char **argv)
 	refresh();
 	x = maxcols / 2;
 	y = maxlines / 2;
-
-	printw("Shoot with X");
-
+	curs_set(0);
 	while (!ps2.isSelectPressed()) {
 		move_invaders();
 		
 		ps2.readPS2();
-		mvprintw(1, 1, "%06d", points);
-
+		mvprintw(1, 1, "Score: %06d ", points);
+		mvaddch(y,x,' ');
+		refresh();
 		if (ps2.getMode() == DIGITALMODE) {
-			mvaddstr(0, 0, "DIGITAL (press MODE to change)  ");
+			mvprintw(0, 0, "DIGITAL %s  ", help);
 			if (ps2.isPadLeftPressed()) {
 				if (x > 0) {
 					x--;
@@ -136,11 +135,13 @@ int main(int argc, char **argv)
 				}
 			}
 		} else if (ps2.getMode() == ANALOGMODE) {
-			mvaddstr(0, 0, "ANALOG (press MODE to change, SELECT to end)   ");
+			mvprintw(0, 0, "ANALOG %s  ", help);
 			x = ((ps2.getLeftX() * maxcols) / 256);
 			y = ((ps2.getLeftY() * maxlines) / 256);
 		}
-
+		if (ps2.isStartPressed()){
+			create_invaders();
+		}
 		if (ps2.isXPressed()) {
 			for (int i = y; i > 0; i--) {
 				mvaddch(i, x, '*');
@@ -166,7 +167,9 @@ int main(int argc, char **argv)
 			mvaddch(y, x, ' ');
 			refresh();
 		}
-
+		mvaddch(y,x,'^');
+		
+		refresh();
 		refresh();
 	}
 	endwin();
