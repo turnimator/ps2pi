@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+
 void ps2pi_t::clk(bool h)  {
 	digitalWrite(clkPin, h);
 	delayMicroseconds(CLK_DELAY);
@@ -37,6 +38,7 @@ unsigned char ps2pi_t::begin(int _commandPin, int _dataPin, int _clkPin,
 	pinMode(dataPin, INPUT);
 	controller_type = 0xff;
 	pullUpDnControl(dataPin, PUD_UP);	// Data pin is open collector, needs pullup.
+	memset(action, 0, sizeof(action));
 	for (int tmout = 0; tmout < MAX_RETRIES; tmout++) {
 		transmitCmdString(type_read, sizeof(type_read));
 		if (PS2data[1] == 0x73) {
@@ -65,6 +67,34 @@ unsigned char ps2pi_t::begin(int _commandPin, int _dataPin, int _clkPin,
 	return -1;
 }
 
+/**
+ * execute all actions that have been set with setXaction() & co
+ * 
+ **/
+void ps2pi_t::dispatch()
+{
+	for(int i=0; i<ACTION_ARRAY_SIZE;i++){
+		
+		if (action[i].f) {
+			
+			// button mask indexes first byte (PS2Data[3]) at i
+			if (i < 8){
+				if (~PS2data[3] & (1 << i)) {
+					(*action[i].f)(action[i].pressure, action[i].user_data);
+				}
+			}
+			else { // button mask indexes second byte (PS2Data[4])  at i - 8
+				if (~PS2data[4] & (1 << (i-8))) {
+					(*action[i].f)(action[i].pressure, action[i].user_data);
+				}
+			}
+		}
+	}
+}
+
+void ps2pi_t::readAndDispatch()
+{
+}
 
 // Transmit and receive one byte
 //Inputs:
@@ -277,6 +307,7 @@ void ps2pi_t::printData()  {
 	if (PS2data[1] == 0xF3) {
 		printf("DS2NATIVEMODE");
 	}
+	printf("\n");
 	busy = false;
 }
 
