@@ -71,14 +71,14 @@ unsigned char ps2pi_t::begin(int _commandPin, int _dataPin, int _clkPin,
 
 /**
  * execute all actions that have been set with setXaction() & co
- * 
+ *
  **/
 void ps2pi_t::dispatch()
 {
 	for(int i=0; i<ACTION_ARRAY_SIZE;i++){
-		
+
 		if (action[i].f) {
-			
+
 			// button mask indexes first byte (PS2Data[3]) at i
 			if (i < 8){
 				if (isValid() && (~PS2data[3] & (1 << i))) {
@@ -95,11 +95,11 @@ void ps2pi_t::dispatch()
 	if (getMode() == ANALOGMODE){
 		if (l_joy.f){
 			//printf("Callback l_joy\n");
-			(*l_joy.f)(-0x80 + getLeftX(), -0x80 + getLeftY(), l_joy.user_data);
+			(*l_joy.f)(-0x80 + getLeftX(), 0x80 - getLeftY(), l_joy.user_data);
 		}
 		if (r_joy.f){
 			//printf("Callback r_joy\n");
-			(*r_joy.f)(-0x80 + getRighX(), -0x80 + getRighY(), r_joy.user_data);
+			(*r_joy.f)(-0x80 + getRighX(), 0x80 - getRighY(), r_joy.user_data);
 		}
 	}
 }

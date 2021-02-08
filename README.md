@@ -14,7 +14,7 @@ IT WORKS FOR ME
 
 To compile, you need the wiringPi library, and if you want to run the curstst program,
 you'll need the curses library.
-I've included two shell scripsts for your convenience.
+I've included two shell scripts for your convenience.
 
 ## Usage
 There's a messy way and a clean way.
@@ -35,7 +35,7 @@ For an example, see the file messy.cpp
 
     Register all your functions as actions
     LOOP
-        Read PS2 Controller and ispatch actions
+        Read PS2 Controller and dispatch actions
     END
 
 For an example, see the file clean.cpp
