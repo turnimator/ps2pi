@@ -91,6 +91,11 @@ struct action_t {
 	void *user_data;
 };
 
+struct joystick_callback_t {
+	void (*f)(int x, int y, void *user_data);
+	void *user_data;
+};
+
 /* Class declaration */
 class ps2pi_t {
 public:
@@ -194,6 +199,15 @@ public:
 	}
 	inline void setR1Action(void ((*a)(int pressure, void* user_data)), void *user_data) { action[ACTION_R1].f = a; action[ACTION_R1].user_data=user_data; }
 	
+	inline void setLeftJoyCallback(void (*f)(int x, int y, void *u), void *user_data) {
+		l_joy.f = f;
+		l_joy.user_data = user_data;
+	}
+
+	inline void setRightJoyCallback(void (*f)(int x, int y, void *u), void *user_data) {
+		r_joy.f = f;
+		r_joy.user_data = user_data;
+	}
 	
 	char getLeftX();
 	char getLeftY();
@@ -208,6 +222,7 @@ private:
 	char controller_type;
 	unsigned char PS2data[21];
 	action_t action[ACTION_ARRAY_SIZE];
+	joystick_callback_t l_joy, r_joy;
 	unsigned char transmitByte(char byte);
 	void transmitCmdString(unsigned char *string, int length);
 	void clk(bool h);

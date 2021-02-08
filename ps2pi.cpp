@@ -39,6 +39,8 @@ unsigned char ps2pi_t::begin(int _commandPin, int _dataPin, int _clkPin,
 	controller_type = 0xff;
 	pullUpDnControl(dataPin, PUD_UP);	// Data pin is open collector, needs pullup.
 	memset(action, 0, sizeof(action));
+	l_joy.f = 0;
+	r_joy.f = 0;
 	for (int tmout = 0; tmout < MAX_RETRIES; tmout++) {
 		transmitCmdString(type_read, sizeof(type_read));
 		if (PS2data[1] == 0x73) {
@@ -88,6 +90,16 @@ void ps2pi_t::dispatch()
 					(*action[i].f)(action[i].pressure, action[i].user_data);
 				}
 			}
+		}
+	}
+	if (getMode() == ANALOGMODE){
+		if (l_joy.f){
+			//printf("Callback l_joy\n");
+			(*l_joy.f)(-0x80 + getLeftX(), -0x80 + getLeftY(), l_joy.user_data);
+		}
+		if (r_joy.f){
+			//printf("Callback r_joy\n");
+			(*r_joy.f)(-0x80 + getRighX(), -0x80 + getRighY(), r_joy.user_data);
 		}
 	}
 }

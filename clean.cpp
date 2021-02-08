@@ -21,6 +21,20 @@
 #include "ps2pi.h"
 
 #define READDELAYMS 10
+char left_joy_string[12];
+
+char right_joy_string[12];
+
+void left_joy_callback(int x, int y, void *user_data){
+	char *p= (char*) user_data;
+	printf("Left joy ");
+	sprintf(p, "x:%d  y:%d ", x, y);
+}
+
+void right_joy_callback(int x, int y, void *user_data){
+	char *p= (char*)user_data;
+	sprintf(p, "x:%d  y:%d ", x, y);
+}
 
 void xaction(int pressure, void* user_data)
 {
@@ -60,10 +74,11 @@ int main(int argc, char **argv)
 	pips2.setXAction(xaction, cmd_string);
 	pips2.setStartAction(startaction, NULL);
 	pips2.setSquareAction(squareaction, NULL);
+	pips2.setLeftJoyCallback(left_joy_callback, left_joy_string);
 	
 	while (1) {
 		pips2.readPS2();
 		pips2.dispatch();
-		
+		printf("\r%s ", left_joy_string);
 	}
 }
