@@ -51,29 +51,35 @@ void squareaction(int pressure, void* user_data)
 		printf("SQUARE pressed\n");
 }
 
-int main(int argc, char **argv)
+void selectaction(int pressure, void* user_data)
+{
+		printf("SELECT pressed\n");
+}
+
+int main()
 {
 	unsigned char cmd_string[21] = { 0x01, 0x42, 0, 0, 0, 0, 0, 0, 0 };
 
-	printf("Atles PS2 Controller\n");
+	printf("Atle\'s PS2 Controller Test Program\n");
 
 	if (wiringPiSetupPhys() == -1) {
-		fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
-		return 1;
+		perror("Unable to start wiringPi");
+		exit(1);
 	}
 
-	// Create a PIPS2 object
 	ps2pi_t pips2;
 	
 	pips2.begin(11, 3, 5, 13);
 
-	int returnVal = pips2.reInitializeController(ANALOGMODE);
+//	int returnVal = pips2.reInitializeController(ANALOGMODE);
 	delay(50);
 	pips2.printData();
 
 	pips2.setXAction(xaction, cmd_string);
 	pips2.setStartAction(startaction, NULL);
 	pips2.setSquareAction(squareaction, NULL);
+	pips2.setSelectAction(selectaction, NULL);
+	
 	pips2.setLeftJoyCallback(left_joy_callback, left_joy_string);
 	
 	while (1) {

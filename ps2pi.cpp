@@ -81,12 +81,12 @@ void ps2pi_t::dispatch()
 			
 			// button mask indexes first byte (PS2Data[3]) at i
 			if (i < 8){
-				if (~PS2data[3] & (1 << i)) {
+				if (isValid() && (~PS2data[3] & (1 << i))) {
 					(*action[i].f)(action[i].pressure, action[i].user_data);
 				}
 			}
 			else { // button mask indexes second byte (PS2Data[4])  at i - 8
-				if (~PS2data[4] & (1 << (i-8))) {
+				if (isValid() && (~PS2data[4] & (1 << (i-8)))) {
 					(*action[i].f)(action[i].pressure, action[i].user_data);
 				}
 			}
