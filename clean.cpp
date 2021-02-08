@@ -38,7 +38,7 @@ void right_joy_callback(int x, int y, void *user_data){
 
 void xaction(int pressure, void* user_data)
 {
-	printf("X pressed\n");
+	printf("X pressed. First byte of cmd_string[] is: 0x%x second byte is:0x%x\n", ((char*)user_data)[0], ((char*)user_data)[1]);
 }
 
 void startaction(int pressure, void* user_data)
