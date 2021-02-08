@@ -20,6 +20,7 @@ I've included two shell scripsts for your convenience.
 There's a messy way and a clean way.
 
 ### The messy way
+
    LOOP
       Read PS2 Controller
       See if this button is pressed
@@ -30,12 +31,17 @@ There's a messy way and a clean way.
 For an example, see the file messy.cpp
 
 ### The clean way
+
     Register all your functions as actions
     LOOP
         Read PS2 Controller and ispatch actions
     END
     
 For an example, see the file clean.cpp
+
+## setXAction(xaction, user_data)
+Register a function void xaction(int pressure, void *user_data) to be called when the X button is pressed.
+The pointer user_data can point to anything.
 
 
 ## TODO
