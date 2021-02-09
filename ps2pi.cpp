@@ -39,6 +39,7 @@ unsigned char ps2pi_t::begin(int _commandPin, int _dataPin, int _clkPin,
 	controller_type = 0xff;
 	pullUpDnControl(dataPin, PUD_UP);	// Data pin is open collector, needs pullup.
 	memset(action, 0, sizeof(action));
+	memset(PS2data, 0, sizeof(PS2data));
 	l_joy.f = 0;
 	r_joy.f = 0;
 	for (int tmout = 0; tmout < MAX_RETRIES; tmout++) {
@@ -46,19 +47,10 @@ unsigned char ps2pi_t::begin(int _commandPin, int _dataPin, int _clkPin,
 		if (PS2data[1] == 0x73) {
 			controller_type = 0x73;
 		}
-
-		// Transmit the enter config command.
-		transmitCmdString(enterConfigMode, sizeof(enterConfigMode));
-
-		// Set mode to analog mode and lock it there.
-		transmitCmdString(set_mode_analog_lock,
-						  sizeof(set_mode_analog_lock));
+		setMajorMode(1);
+		setConfigModePressure();
 		delay(CMD_DELAY);
 
-		// Return all pressures
-		//      transmitCmdString(config_AllPressure, sizeof(config_AllPressure));
-		// Exit config mode.
-		transmitCmdString(exitConfigMode, sizeof(exitConfigMode));
 		readPS2();
 
 		// If read was successful (controller indicates it is in analog mode), break this config loop.
@@ -164,10 +156,17 @@ void ps2pi_t::transmitCmdString(unsigned char *s, int len)  {
 	// Packet finished, release attention line.
 	digitalWrite(attnPin, 1);
 }
+
 void ps2pi_t::setMajorMode(int mode)
-{	unsigned char cmd[9] = { 0x01, 0x44, 0, 1, 3, 0, 0, 0, 0 };
-	transmitCmdString(cmd, 9);
+{
+	set_major_mode[3] = mode;
+	transmitCmdString(enterConfigMode, 9);
+	delay(CMD_DELAY);
+	transmitCmdString(set_major_mode, 9);
+	delay(CMD_DELAY);
+	transmitCmdString(exitConfigMode, 9);
 }
+
 char ps2pi_t::getLeftX()  {
 	static char val = 0x80;
 
@@ -206,6 +205,7 @@ int ps2pi_t::readPS2(void)  {
 		return -1;
 	}
 	busy = true;
+	memset(PS2data, 0, sizeof(PS2data));
 
 	// Ensure that the command bit is high before clocing out and dropping att.
 	digitalWrite(commandPin, 1);
@@ -218,16 +218,20 @@ int ps2pi_t::readPS2(void)  {
 	delayMicroseconds(BYTE_DELAY);
 
 	// The TX and RX buffer used to read the controller.
-	unsigned char TxRx1[21] =
+	unsigned char TxRxNoActuator[21] =
 	{	0x01, 0x42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0
 	};
-
+	unsigned char TxRxActuator[21] =
+	{	0x01, 0x42, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0
+	};
+	unsigned char* txrx = TxRxNoActuator;
 	// Grab the first 9 bits
 	int i;
 	for (i = 0; i < 9; i++)
 	{
-		PS2data[i] = transmitByte(TxRx1[i]);
+		PS2data[i] = transmitByte(txrx[i]);
 	}
 
 	// If controller is in full data return mode, get the rest of data
@@ -235,7 +239,7 @@ int ps2pi_t::readPS2(void)  {
 	{
 		while (i < 21)
 		{
-			PS2data[i] = transmitByte(TxRx1[i]);
+			PS2data[i] = transmitByte(txrx[i]);
 
 			//printf("%d: %d\t->\t%d\n", i, (int)TxRx1[i], (int)PS2data[i]);
 			i++;
@@ -267,15 +271,20 @@ int ps2pi_t::readPS2(void)  {
 //              -1                      - Invalid mode!
 //              -2                      - Failed to get controller into desired mode in less than MAX_INIT_ATTEMPT attempts
 int ps2pi_t::reInitializeController(char _controllerMode)
-{	transmitCmdString(enterConfigMode, sizeof(enterConfigMode));
-	transmitCmdString(set_mode_analog_lock, sizeof(set_mode_analog_lock));
+{
+	setMajorMode(_controllerMode);
 	return 0;
 }
 int ps2pi_t::reInitializeController()
-{	transmitCmdString(enterConfigMode, sizeof(enterConfigMode));
-	transmitCmdString(set_mode_analog_lock, sizeof(set_mode_analog_lock));
+{	setMajorMode(1);
 	return 0;
 }
+
+void ps2pi_t::setConfigModePressure(){
+	transmitCmdString(enterConfigMode, sizeof(enterConfigMode));
+	transmitCmdString(config_AllPressure, sizeof(config_AllPressure));
+}
+
 void ps2pi_t::printData()  {
 	static bool busy = false;
 	if (busy) {
@@ -320,6 +329,20 @@ void ps2pi_t::printData()  {
 		printf("DS2NATIVEMODE");
 	}
 	printf("\n");
+
+	printf("PRES_RIGHT %d\n", PS2data[10]);
+	printf("PRES_LEFT %d\n", PS2data[11]);
+	printf("PRES_UP %d\n", PS2data[12]);
+	printf("PRES_DOWN %d\n", PS2data[13]);
+	printf("PRES_TRIANGLE %d\n", PS2data[14]);
+	printf("PRES_CIRCLE %d\n", PS2data[15]);
+	printf("PRES_X %d\n", PS2data[16]);
+	printf("PRES_SQUARE %d\n", PS2data[17]);
+	printf("PRES_L1	 %d\n", PS2data[18]);
+	printf("PRES_R1 %d\n", PS2data[19]);
+	printf("PRES_L2 %d\n", PS2data[20]);
+	printf("PRES_R2 %d\n", PS2data[21]);
+
 	busy = false;
 }
 
